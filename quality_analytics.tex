@@ -53,7 +53,7 @@
 
 \begin{document}
 
-\maketitle
+\maketitle}
 
 \section{Introduction}
 The date is 12-15-2025.  I've just completed a 27 hour 'speedrun' of a game called Factorio bringing my total hours played to near 650 - 200 of which occuring in the past month.
@@ -125,128 +125,134 @@ Though there are simple cases, I hope to do a full analysis of the upcycling dyn
 
 \section{Modeling Components}
 The purpose of this section is to define a minimal mathematical language that mirrors the mechanics of quality upcycling in Factorio, while remaining flexible enough to support analysis and optimization.
-Let us index one iteration loop by a counter $t = 0,1,2,\dots$, where each iteration corresponds to one complete loop of assembly followed by recycling.
+Let us index one iteration loop by a counter $t = 0,1,2,\dots$, where each iteration corresponds to one complete pass through recycling followed by assembly.
 Quality is discretized into $n = 5$ ordered classes indexed by $i \in \{0,1,2,3,4\}$, with $i = 0$ representing base quality and $i = 4$ representing legendary quality.
-Legendary items are an absorbing state and will later exit the loop so we don't put them back into a recycler (and lose some of the material).
+Legendary items are terminal outputs of the system and are removed from circulation immediately after assembly.
 
 \subsection*{Decomposition of a Loop}
 Each loop consists of two conceptually distinct stages.
 
 \begin{enumerate}
-\item \emph{Assembly}: recyclable material is converted into the chosen item. Assembly may increase quality and applies a productivity bonus.
-\item \emph{Recycling}: non-legendary items are recycled, returning a fraction of their material input and potentially increasing quality further.
+\item \emph{Recycling}: assembled items are recycled into ingredient-equivalents, returning a fraction of their material input and potentially increasing quality.
+\item \emph{Assembly}: all recycled ingredients are assembled back into items, possibly increasing quality further and applying a productivity bonus. Legendary items are extracted at this stage.
 \end{enumerate}
-This breakdown of a loop into assembly and recycling will prove helpful later as we'll be able to make very strong claims about the operators of each sub-process.
+
+This ordering reflects the physical behavior of a typical upcycling setup: assembled items circulate through recycling, ingredients are reassembled, and only completed legendary items are removed from the loop.
 
 \subsection*{State Variables}
-Let $M_{i,t}$ denote the amount of recycled material of quality $i$ available at the beginning of iteration $t$ measured in item-equivalents.
-For example, $M_{4,3}$ denotes the number of legendary quality item-equivalent ingredients at the beginning of iteration $3$.
-Furthermore, let $C_{i,t}$ denote the expected number of items of quality $i$ produced after crafting the previous $M$ materials into items.
-Importantly $M_{i,t} = C_{i,t}$ need not be true due to the productivity and quality percentage of crafting.
-For brevity, we will often collect these quantities into vectors
+Let $X_{i,t}$ denote the expected number of \emph{assembled items} of quality $i$ entering the recycling stage at the beginning of iteration $t$.
+Legendary items are not part of the circulating state, so $X_{4,t}=0$ for all $t$.
+Similarly, at the beginning of the process, there are no items in the loop, so $X_{i,1} = 0$ for all $i$.
+Further, let $M_{i,t}$ denote the amount of recycled ingredient-equivalents of quality $i$ produced during iteration $t$ and $C_{i,t}$ the number of assembled items of quality $i$ produced during iteration $t$.
+For brevity, we collect these quantities into vectors:
 \begin{equation*}
+X_t = (X_{0,t}, X_{1,t}, X_{2,t}, X_{3,t}, X_{4,t})^\top,
+\quad
 M_t = (M_{0,t}, M_{1,t}, M_{2,t}, M_{3,t}, M_{4,t})^\top,
-\qquad
+\quad
 C_t = (C_{0,t}, C_{1,t}, C_{2,t}, C_{3,t}, C_{4,t})^\top.
 \end{equation*}
 
-\subsection*{Assembly and Recyling Operators}
-Assembly quality behavior is encoded by a matrix $A \in \mathbb{R}^{5 \times 5}$, where $A_{ij}$ is the probability that material of quality $i$ produces a circuit of quality $j$ during assembly.
-Recycling quality behavior is encoded by a matrix $R \in \mathbb{R}^{5 \times 5}$, defined analogously.
-Separately, let us also define $p>0$ as the productivity applied during assembly.  That is, whenever an assembly of an item is completed, a total of $1+p$ quantities of that item are produced \textit{all of the same quality}.
-Similarly, define $r \in (0,1)$ to be the fraction of materials returned by the recycler.  In Factorio, this is always $25\%$ and cannot be modified, but let us generalize it for the sake of completeness.
-Regarding quality, define $q_a$ and $q_r$ to be the quality percentage during the assembly and recycling components of a single loop.
-Lastly, using Factorio's quality mechanic upgrade structure, both $A$ and $R$ have an identical structure using their definitions of $q_a$ and $q_r$ respectively:
+\subsection*{Assembly and Recycling Operators}
+Assembly quality behavior is encoded by a matrix $A \in \mathbb{R}^{5 \times 5}$, where $A_{ij}$ is the probability that an ingredient of quality $i$ produces an assembled item of quality $j$.
+Recycling quality behavior is encoded by a matrix $R \in \mathbb{R}^{5 \times 5}$, defined analogously for the recycling process.
+Let $p>0$ denote the additive productivity applied during assembly, so that each assembly produces a total of $1+p$ items of identical quality.
+Let $r \in (0,1)$ denote the fraction of ingredient-equivalents returned by recycling.
+Define $q_a$ and $q_r$ as the quality percentages applied during assembly and recycling, respectively.
+Using Factorio’s quality mechanics, both $A$ and $R$ share the same upper-triangular structure:
 \begin{equation*}
 R_{ij}
 =
 \begin{cases}
-    0, & j<i\\
-1 - q_r, & i=j, \\[6pt]
-\dfrac{9 q_r}{10^{\Delta}}, & 1 \le j < 4, \\[10pt]
-\dfrac{q_r}{10^{3-i}}, & j = 4
+0, & j<i,\\
+1 - q_r, & j=i, \\[6pt]
+\dfrac{9 q_r}{10^{j-i}}, & i<j<4, \\[10pt]
+\dfrac{q_r}{10^{3-i}}, & j=4.
 \end{cases}
 \end{equation*}
-where $\Delta = j-i$. $A_{ij}$ is defined similarly using $q_a$ in place of $q_r$.
-Simply put, $A$ and $R$ represent the expected transformation that the upcycling system goes through when putting everything into an assembler/recycler, respectively.
-These two matrices are linear operators that have a few nice properties.  They are:
-\begin{itemize}
-    \item upper triangular (no non-zero entries in the lower half of the matrix)
-    \item row-stochastic (rows sum to 1)
-\end{itemize}
-
+The matrix $A$ is defined analogously with $q_a$ in place of $q_r$.
+Both matrices are row-stochastic and encode the expected quality transition during each sub-process.
 
 \section{Derivation of Key Relations}
-With the definitions presented in the previous section, we can start to derive relations by translating the Factorio mechanics into mathematics.
+With the modeling framework in place, we now translate the mechanics of upcycling into algebraic recurrence relations.
 
 \subsection*{Recurrence Relations}
-Note that by definition of a single iteration loop, we have the following equations regarding the number of materials pre- and post- recycling.
-First, we have
+At the beginning of iteration $t$, assembled items $X_t$ enter recycling together with an external inflow $S$ of assembled items.
+Recycling produces ingredient-equivalents according to
 \begin{equation*}
-    C_t = p A^\top M_t
+M_t = r\,R^\top (X_t + S).
 \end{equation*}
-which effectively says that the distribution of quality items produced at step $t$ is the result of applying the linear operator $A$ to the materials present at the start of iteration $t$, scaled upward accounting for productivity.  Similarly, we also have
+All recycled ingredients are then assembled, yielding
 \begin{equation*}
-    M_{t+1} = rR^{\top}\Pi C_t
+C_t = (1+p)\,A^\top M_t.
 \end{equation*}
-meaning that the number of materials available at the beginning of loop $t+1$ is result of applying the linear operator $R$ to the number of items in iteration $t$, scaled downward accounting for recycling material loss.
-The only difference here is the existence of the projection matrix $\Pi$ which represents the action of removing legendary items from circulation before recycling everything\footnote{Test yourself: what does $\Pi$ look like in matrix form?}.
-Combining these two, we have the all-in-one relation
+Legendary items are extracted after assembly, and only non-legendary items re-enter the loop. Let $\Pi$ denote the projection matrix that zeros out the legendary component. The circulating state therefore evolves as
 \begin{equation*}
-    M_{t+1} = r(1+p) R^{\top}\Pi A^{\top}M_t = LM_t
+X_{t+1} = \Pi C_t.
 \end{equation*}
-with $L = r(1+p)R^\top \Pi A^\top$ representing the transformation of materials from one loop to the next. The definitions of $A, R$, and $L$ help us derive many properties of the upcycling system.
+Combining these relations yields the affine recurrence
+\begin{equation*}
+X_{t+1}
+=
+r(1+p)\,\Pi A^\top R^\top (X_t+S)
+\end{equation*}
+We define the loop operator
+\begin{equation*}
+L = r(1+p)\,\Pi A^\top R^\top,
+\end{equation*}
+so that
+\begin{equation*}
+X_{t+1} = L (X_t + S).
+\end{equation*}
 
 \subsection*{Mass Decay}
-Since both $A$ and $R$ are row-stochastic, the total amount of material in circulation must necessarily decrease provided that $r(1+p) < 1$ since
+Since both $A$ and $R$ are row-stochastic and $\Pi$ is a contraction, the induced $1$-norm of $L$ satisfies
 \begin{align*}
-    ||L||_1 &= ||r(1+p)R^{\top}\Pi A^{\top}||_1\\
-    &= r(1+p)||R^{\top}\Pi A^{\top}||_1\\
-    &\leq r(1+p)||R^{\top}||_1||\Pi||_1||A^{\top}||_1\\
-    &\leq r(1+p)\\
-    &< 1
+\|L\|_1
+&\le r(1+p)\,\|\Pi\|_1 \|A^\top\|_1 \|R^\top\|_1 \\
+&< r(1+p)\|A^\top\|_1 \|R^\top\|_1 \\
+&= r(1+p).
 \end{align*}
-This derivation shows that the 1-norm of $L$ - and consequently its  spectral radius $\rho(L)$ - is less than $1$. This property is necessary for much of our remaining properties to hold.
-In fact, one could argue for something slightly stronger by exploiting properties of $\Pi$, but specifically for Factorio there is no need to.
-For somewhat obvious reasons, due to their inherent setting of $r=0.25$, the developers introduced a $300\%$ maximum productivity. This alone guarantees our spectral radius is no larger than $1$.
-For our non-technical purposes, that simply means given a certain number of inputs, a finite number of legendary items will be produced if we let our system run for an indefinite amount of time.
+Whenever $r(1+p)\leq 1$, it follows that $\rho(L)<1$, ensuring that circulating mass decays geometrically in expectation.
+This condition guarantees that the upcycling process produces a finite amount of output from any finite input.
+In fact, this condition is guaranteed to hold.  Indeed, the developers of Factorio recognized the need for a control on item expansion and have capped the additional productivity $p$ at $300\%$.
+Since Factorio uses a fixed $r=0.25$, the game ensures a stable spectral radius $\rho(L)$.
 
 \subsection*{Legendary Production}
-One of the more fundamental questions for upcycling is: given a certain amount of the initial item, how many legendary versions of this item will I obtain after I let the upcycling process fully run to termination?
-To answer this question, first note that we can slightly generalize the question into: over the entire course of the upcycling process, how much of each item quality will I produce?
-This can be written as
+Legendary items produced during iteration $t$ are given by the legendary component of $C_t$:
 \begin{equation*}
-    C_{total} = \sum_{t=0}^{\infty} C_t
+y_t = e_4^\top C_t
+= e_4^\top (1+p)A^\top rR^\top (X_t + S).
 \end{equation*}
-but since the spectral radius of $L$ satisfies $\rho(L)<1$, we can rewrite this Neumann series as
-\begin{align*}
-    \sum_{t=0}^{\infty} C_t &= \sum_{t=0}^{\infty} (1+p) A^{\top}L^t M_0\\
-    &= (1+p)A^{\top}\sum_{t=0}^{\infty}L^t M_0\\
-    &= (1+p)A^{\top}(I-L)^{-1}M_0
-\end{align*}
-where $M_0$ denotes the vector of initial items we begin the upcycling process with.
-The number of legendary items produced during this process (which is equivalent to the number of legendary items we are left with at the end of the process) is given by the last component of the vector $C_{total}$.
-In other words, by setting $M_0 = e_0$, $e_4^\top (1+p) A^{\top}(I-L)^{-1}e_0$ denotes the amount of legendary material we obtain from upcycling one item of regular quality.  Here, $e_k$ is used to denote the identify vector of all zeros with a singular $1$ in the $k$-th component.
+For a one-time injection $S$ with no further inflow, the total expected legendary output is
+\begin{equation*}
+\sum_{t=0}^{\infty} y_t
+=
+e_4^\top (1+p)A^\top rR^\top
+\sum_{t=0}^{\infty} L^t S.
+\end{equation*}
+Since $\rho(L)<1$, the Neumann series converges and
+\begin{equation*}
+\sum_{t=0}^{\infty} y_t
+=
+e_4^\top (1+p)A^\top rR^\top (I-L)^{-1} S.
+\end{equation*}
+For $S=e_0$, this expression gives the expected number of legendary items ultimately produced per base-quality input item.
 
 \subsection*{Steady State Behavior}
-Most applications of upcycling don't have fixed start/stop points.  Rather, a steady production of $s$ normal quality items are produced "per iteration" and added to the upcycling system.
-We've seen in previous sections that since $r(1+p)<1$, the number of items in circulation should strictly decrease, but if new materials are added each iteration, then eventually the system will reach some steady state behavior where the number of items being recycled out is equal to the number of items being added per loop.
-This steady state is of interest because it defines the ordinary operating state of the upcycler.
-One question we can ask ourselves about the steady state dynamics is how many items are in circulation in steady state?
-This is quite an easy answer using our recurrence relation
+If a constant inflow $S$ of assembled items is added each iteration, the system converges to a steady state satisfying
 \begin{equation*}
-    M_{t+1} = LM_{t} + S
+X^* = L (X^* + S),
 \end{equation*}
-accounting for the addition of the vector of $S$ (usually $c\cdot e_0$ items in each loop for some constant $c$) to the system on each iteration.
-The steady state solution $M^*$ must satisfy
+or equivalently
 \begin{equation*}
-    M^* = LM^* + S
+X^* = (I-L)^{-1} L S.
 \end{equation*}
-or in other words
+The steady-state legendary production per iteration is then
 \begin{equation*}
-    M^* = (I-L)^{-1}S
+y^* = e_4^\top (1+p)A^\top rR^\top (X^* + S).
 \end{equation*}
-Using this vector\footnote{Ask yourself why this solution looks so similar to the previous one}, one can determine approximately how large a factory needs to be to support an upcycling system capable of producing a fixed number of legendary items per loop.
+This quantity characterizes the long-run operating behavior of the upcycler and directly links factory scale to sustained legendary output\footnote{Ask yourself: why does this look so similar to the legendary items produced in the previous subsection?}.
 
 \section{Results Summary and Examples}
 If the last section was a bit math-heavy, this section should be a reprieve as it is primarily focused on using the results above.
@@ -276,39 +282,39 @@ At a high level, productivity and quality influence the upcycling system in fund
 \subsection*{Productivity as Mass Amplification}
 Recall that productivity enters the model through the scalar factor $(1+p)$ in the loop operator
 \begin{equation*}
-L = r(1+p) R^\top \Pi A^\top.
+L = r(1+p)\,\Pi A^\top R^\top.
 \end{equation*}
-Increasing productivity uniformly scales the amount of material produced during assembly and, consequently, the amount of material presented to the recycler. In isolation, higher productivity appears desirable: more items are produced per unit of input.
-However, this amplification is indiscriminate. Additional productivity increases not only the flow of high-quality items toward absorption, but also the circulation of low-quality items that will be recycled multiple times and partially lost at each pass. From the perspective of the loop operator, increasing productivity pushes the spectral radius $\rho(L)$ upward, lengthening the expected lifetime of material within the recycling loop and increasing cumulative recycling losses.
+Increasing productivity uniformly scales the amount of material produced during assembly and, consequently, the amount of material that re-enters the recycling stage. In isolation, higher productivity appears desirable: more items are produced per unit of input.
+However, this amplification is indiscriminate. Additional productivity increases not only the flow of high-quality items toward absorption, but also the circulation of low-quality items that must pass through the recycler multiple times and suffer material loss at each iteration. From the perspective of the loop operator, increasing productivity pushes the spectral radius $\rho(L)$ upward, lengthening the expected lifetime of material within the recycling loop and increasing cumulative recycling losses.
 In short, productivity increases throughput, but it also increases exposure to loss.
 
 \subsection*{Quality as Escape Acceleration}
-Quality, by contrast, alters the structure of the transition matrices $A$ and $R$. Increasing quality shifts probability mass upward in quality space, increasing the likelihood that an item exits the loop early by reaching the legendary state. In terms of the linear system, higher quality decreases the expected number of iterations before absorption.
-This effect is nonlinear. A modest increase in quality can significantly reduce the expected number of recycling passes, especially when starting from low or moderate quality levels. As a result, quality improvements tend to reduce total material loss even though they do not increase raw throughput.
-From the perspective of $(I-L)^{-1}$, increasing quality reduces the total mass accumulated in the transient subsystem before absorption.
+Quality, by contrast, alters the structure of the transition matrices $A$ and $R$. Increasing quality shifts probability mass upward in quality space, increasing the likelihood that an item reaches legendary quality during assembly and is extracted from the system.
+In terms of the linear dynamics, higher quality decreases the expected number of loop iterations before absorption. This effect is nonlinear: a modest increase in quality can substantially reduce the expected number of recycling passes, especially when starting from base or intermediate quality levels.
+As a result, quality improvements tend to reduce total material loss even though they do not increase raw throughput. From the perspective of the fundamental matrix $(I-L)^{-1}$, increasing quality reduces the total mass accumulated in the transient subsystem before absorption.
 
 \subsection*{Interpreting the Tradeoff}
 The tension between productivity and quality can therefore be summarized as follows:
 \begin{itemize}
-\item Productivity increases how much material enters the system each loop.
-\item Quality decreases how long material remains in the system.
+\item Productivity increases how much material is generated during each assembly step.
+\item Quality decreases how long material remains in the lossy recycling loop.
 \end{itemize}
 An effective upcycling system must balance these two effects. Excessive productivity without sufficient quality leads to large volumes of low-quality material circulating for many iterations, incurring repeated recycling losses. Excessive quality without sufficient productivity, on the other hand, produces clean but anemic throughput.
-Within the mathematical model, this balance is reflected in the behavior of the fundamental matrix $(I-L)^{-1}$. Productivity increases the magnitude of $L$, while quality reshapes $L$ so that its mass is directed more quickly toward absorption.
+Within the mathematical model, this balance is reflected in the behavior of the loop operator $L$ and its associated fundamental matrix $(I-L)^{-1}$. Productivity increases the magnitude of $L$, while quality reshapes $L$ so that probability mass is directed more quickly toward absorption.
 
 \subsection*{Rules of Thumb}
 Several practical heuristics emerge naturally from this analysis.
 First, quality is most valuable when the expected number of recycling passes is large. Early in an upcycling chain, or when starting from base-quality inputs, increasing quality tends to pay for itself by sharply reducing downstream losses.
 Second, productivity becomes more attractive once the system reliably upgrades items within one or two loops. When most material reaches epic or legendary quality quickly, additional productivity primarily scales useful output rather than waste.
-Third, a useful mental model is to think in terms of expected loop count. If a typical item is recycled many times before reaching legendary quality, prioritize quality. If most items are upgraded rapidly, prioritize productivity.
+Third, a useful mental model is to think in terms of expected loop count. If a typical item circulates through many recycling iterations before reaching legendary quality, prioritize quality. If most items are upgraded rapidly, prioritize productivity.
 Finally, base productivity matters. When assemblers already have substantial built-in productivity, the marginal benefit of additional productivity modules diminishes relative to quality modules. In such settings, allocating early module slots to quality often produces better long-run results.
 
 \subsection*{A Broader Perspective}
-While the canonical Factorio numbers of $25\%$ productivity versus $5\%$ quality motivate much of this discussion, the same reasoning applies more generally. Any change that increases throughput should be weighed against its effect on the lifetime of material within lossy subsystems. Conversely, any change that accelerates absorption reduces cumulative loss, even if it does not increase immediate output.
+While the canonical Factorio numbers of $25\%$ productivity versus $5\%$ quality motivate much of this discussion, the same reasoning applies more generally. Any change that increases throughput should be weighed against its effect on the expected lifetime of material within lossy subsystems. Conversely, any change that accelerates absorption reduces cumulative loss, even if it does not increase immediate output.
 Seen through this lens, the choice between productivity and quality modules is not merely a numerical comparison of percentages, but a question of system dynamics. The optimal choice depends less on local gains and more on how quickly the system converts raw inputs into terminal output.
 
 \subsection*{Model-Based Comparison and Optimal Module Allocation}
-The discussion above can be made precise within the linear framework already developed. In particular, the choice between productivity and quality modules can be posed as an optimization problem over the expected legendary yield obtained from a single injection of input material.
+The discussion above can be made precise within the linear framework already developed. In particular, the choice between productivity and quality modules can be posed as an optimization problem over the expected legendary yield obtained from a single injection of assembled input material.
 Suppose an assembler has a fixed number of module slots, say $M=5$. Let $m_p$ denote the number of productivity modules and $m_q = M - m_p$ the number of quality modules installed. We assume that productivity modules increase additive productivity by a fixed increment $\Delta_p$ per module, while quality modules increase assembly quality by a fixed increment $\Delta_q$ per module. Let $p_0$ denote the assembler’s base additive productivity. Then the effective parameters entering the model are
 \begin{equation*}
 p = p_0 + m_p \Delta_p,
@@ -317,21 +323,22 @@ q_a = m_q \Delta_q,
 \end{equation*}
 with $q_r$ and $r$ held fixed by the recycler configuration.
 
-For a one-time injection of material represented by a vector $S$, the total expected number of legendary items produced over the entire lifetime of the system was shown earlier to be
+For a one-time injection of assembled items represented by a vector $S$, the total expected number of legendary items produced over the lifetime of the system is
 \begin{equation*}
-e_4^\top (1+p)\,A^\top (I-L)^{-1} S,
+e_4^\top (1+p)\,A^\top rR^\top (I-L)^{-1} S,
 \end{equation*}
 where
 \begin{equation*}
-L = r(1+p)\,R^\top \Pi A^\top.
+L = r(1+p)\,\Pi A^\top R^\top.
 \end{equation*}
 Normalizing by the total amount of injected material, we define the expected legendary yield per unit input as
 \begin{equation*}
 \eta(p,q_a;S)
 =
-\frac{e_4^\top (1+p)\,A^\top (I-L)^{-1} S}{\mathbf{1}^\top S}.
+\frac{e_4^\top (1+p)\,A^\top rR^\top (I-L)^{-1} S}{\mathbf{1}^\top S}.
 \end{equation*}
-In the common case where one unit of base-quality material is injected, $S=e_0$, this quantity has a particularly direct interpretation: it is the expected number of legendary items ultimately produced per base item-equivalent consumed.
+In the common case where one unit of base-quality assembled material is injected, $S=e_0$, this quantity has a direct interpretation: it is the expected number of legendary items ultimately produced per base item consumed.
+
 This scalar objective provides a principled way to compare module allocations. For each integer choice $m_p \in \{0,1,\dots,M\}$, one constructs the corresponding matrices $A$ and $L$ using $q_a = (M-m_p)\Delta_q$ and $p = p_0 + m_p\Delta_p$, evaluates $\eta$, and selects the maximizing configuration. Because the feasible set is small and discrete, the optimum can be found by straightforward enumeration.
 Beyond identifying a single optimum, this formulation also clarifies the local tradeoff between productivity and quality. Consider replacing one productivity module with one quality module, holding all else fixed. The sign of the discrete difference
 \begin{equation*}

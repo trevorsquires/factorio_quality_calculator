@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.7.13)  16 DEC 2025 18:03
+This is pdfTeX, Version 3.141592653-2.6-1.40.27 (MiKTeX 25.4) (preloaded format=pdflatex 2025.7.13)  17 DEC 2025 18:02
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -384,7 +384,7 @@ Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 \c@proposition=\count319
 \c@lemma=\count320
 \c@corollary=\count321
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 55
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 54
 .
 
 (C:\Users\trevo\AppData\Local\Programs\MiKTeX\tex/latex/lm\t1lmr.fd
@@ -397,24 +397,24 @@ File: l3backend-pdftex.def 2025-06-09 L3 backend support: PDF output (pdfTeX)
 ) (C:/Users\trevo\PycharmProjects\factorio\auxil\quality_analytics.aux)
 \openout1 = `quality_analytics.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 54.
+LaTeX Font Info:    ... okay on input line 54.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -476,56 +476,56 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 fg
 File: epstopdf-sys.cfg 2021/03/18 v2.0 Configuration of epstopdf for MiKTeX
 ))
-Package hyperref Info: Link coloring OFF on input line 55.
+Package hyperref Info: Link coloring OFF on input line 54.
  (C:/Users\trevo\PycharmProjects\factorio\auxil\quality_analytics.out)
 (C:/Users\trevo\PycharmProjects\factorio\auxil\quality_analytics.out)
 \@outlinefile=\write3
 \openout3 = `quality_analytics.out'.
 
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 5
-8.
+7.
 
 (C:\Users\trevo\AppData\Local\Programs\MiKTeX\tex/latex/lm\ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OML+lmm on input line 5
-8.
+7.
 
 (C:\Users\trevo\AppData\Local\Programs\MiKTeX\tex/latex/lm\omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 
-58.
+57.
 
 (C:\Users\trevo\AppData\Local\Programs\MiKTeX\tex/latex/lm\omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 
-58.
+57.
 
 (C:\Users\trevo\AppData\Local\Programs\MiKTeX\tex/latex/lm\omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 58.
+(Font)              <12> on input line 57.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 58.
+(Font)              <8> on input line 57.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 58.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 58.
+(Font)              <6> on input line 57.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 57.
 
 
 (C:\Users\trevo\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 58.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 57.
 
 
 (C:\Users\trevo\AppData\Local\Programs\MiKTeX\tex/latex/amsfonts\umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 89.
+(Font)              <10.95> on input line 88.
 
 
 [1
@@ -536,26 +536,35 @@ o/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ec.enc}]
 [2{C:/Users/trevo/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathit.en
 c}{C:/Users/trevo/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-rm.enc}{C
 :/Users/trevo/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathsy.enc}]
+Overfull \hbox (42.5482pt too wide) detected at line 154
+\OML/lmm/m/it/10.95 X[] \OT1/lmr/m/n/10.95 = (\OML/lmm/m/it/10.95 X[]; X[]; X[]
+; X[]; X[]\OT1/lmr/m/n/10.95 )[]\OML/lmm/m/it/10.95 ;  M[] \OT1/lmr/m/n/10.95 =
+ (\OML/lmm/m/it/10.95 M[]; M[]; M[]; M[]; M[]\OT1/lmr/m/n/10.95 )[]\OML/lmm/m/i
+t/10.95 ;  C[] \OT1/lmr/m/n/10.95 = (\OML/lmm/m/it/10.95 C[]; C[]; C[]; C[]; C[
+]\OT1/lmr/m/n/10.95 )[]\OML/lmm/m/it/10.95 :
+ []
+
+
 
 [3]
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 1
-75.
- (C:\Users\trevo\AppData\Local\Programs\MiKTeX\tex/latex/lm\ts1lmr.fd
-File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <9> on input line 194.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 194.
-
 
 [4{C:/Users/trevo/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-mathex.en
-c}{C:/Users/trevo/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ts1.enc}]
+c}]
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <9> on input line 255.
+LaTeX Font Info:    External font `lmex10' loaded for size
+(Font)              <5> on input line 255.
 
 
 [5]
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 2
+62.
+ (C:\Users\trevo\AppData\Local\Programs\MiKTeX\tex/latex/lm\ts1lmr.fd
+File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
 
-[6]
+[6{C:/Users/trevo/AppData/Local/Programs/MiKTeX/fonts/enc/dvips/lm/lm-ts1.enc}]
+
 
 [7]
 
@@ -570,8 +579,8 @@ Package rerunfilecheck Info: File `quality_analytics.out' has not changed.
 (rerunfilecheck)             Checksum: A6C8DE7F1FBE492785293226A3814836;1156.
  ) 
 Here is how much of TeX's memory you used:
- 11374 strings out of 468221
- 175909 string characters out of 5432891
+ 11373 strings out of 468221
+ 175898 string characters out of 5432891
  586843 words of memory out of 5000000
  39678 multiletter control sequences out of 15000+600000
  692612 words of font info for 87 fonts, out of 8000000 for 9000
@@ -595,9 +604,9 @@ rs/trevo/AppData/Local/Programs/MiKTeX/fonts/type1/public/lm/lmr9.pfb><C:/Users
 trevo/AppData/Local/Programs/MiKTeX/fonts/type1/public/amsfonts/symbols/msbm10.
 pfb>
 Output written on C:/Users\trevo\PycharmProjects\factorio\out\quality_analytics
-.pdf (9 pages, 308138 bytes).
+.pdf (9 pages, 301494 bytes).
 PDF statistics:
- 214 PDF objects out of 1000 (max. 8388607)
- 49 named destinations out of 1000 (max. 500000)
+ 208 PDF objects out of 1000 (max. 8388607)
+ 48 named destinations out of 1000 (max. 500000)
  49 words of extra memory for PDF output out of 10000 (max. 10000000)
 

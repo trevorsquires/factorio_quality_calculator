@@ -115,10 +115,14 @@ def steady_state_circulation(
         raise ValueError("Dimension mismatch among s_inflow, A, R")
 
     I = np.eye(n, dtype=float)
-    m_star = np.linalg.solve(I - L, s_inflow)
-    c_star = p * (A.T @ m_star)
+    x_star = np.linalg.solve(I - L, L @ s_inflow)
 
-    return m_star, c_star
+    # recycled ingredients
+    m_star = 0.25 * (R.T @ (x_star + s_inflow))
+    c_star =p * (A.T @ m_star)
+
+    return x_star, m_star, c_star
+
 
 def parse_module_choice(label: str) -> tuple[int, int]:
     """
@@ -189,6 +193,7 @@ with st.sidebar:
     n_modules_assembly = st.number_input("Number of module slots in assembly", min_value=0, value=4, step=1)
     n_prod_modules_used = st.number_input("Number of prod modules used", min_value=0, value=0, step=1)
 
+
     # Build the 15 options: level 1-3 × tier 1-5
     prod_options = [f"Prod {lvl} ({TIERS[tier]})" for lvl in (1, 2, 3) for tier in (1, 2, 3, 4, 5)]
     qual_options = [f"Quality {lvl} ({TIERS[tier]})" for lvl in (1, 2, 3) for tier in (1, 2, 3, 4, 5)]
@@ -201,6 +206,10 @@ with st.sidebar:
     max_quality_available_name = st.selectbox("Best quality tier available", TIERS.values(), index=4)
     items_added_per_sec = st.number_input("Items added to circulation per second (items/sec)", min_value=0.0, value=1.0, step=0.1)
 
+    if n_prod_modules_used > n_modules_assembly:
+        st.error("Error: Using more prod modules than available slots in assembly")
+        st.stop()
+
 # ----------------------------
 # Internal Calculations
 # ----------------------------
@@ -209,13 +218,13 @@ num_qualitier_tiers = tier_name_to_value[max_quality_available_name]
 seconds_per_loop = compute_loop_rate(craft_rate, recycle_rate)
 loops_per_second = 1/seconds_per_loop
 bonus_productivity, q_a, q_r = get_module_rates(best_prod_label, best_quality_label)
-p = 1+bonus_productivity
+p = min(4, 1+bonus_productivity)
 
 # Matrices
 A = build_quality_matrix(q_a, num_qualitier_tiers)
 R = build_quality_matrix(q_r, num_qualitier_tiers)
 Pi = projection_nonlegendary(num_qualitier_tiers)
-L = 0.25 * p * (R.T @ Pi @ A.T)
+L = 0.25 * p * (Pi @ A.T @ R.T)
 
 # Flow
 items_added_per_loop = items_added_per_sec * seconds_per_loop
@@ -235,7 +244,7 @@ s[0] = items_added_per_loop
 # ----------------------------
 # Compute Outputs
 # ----------------------------
-m_star, c_star = steady_state_circulation(s, A, L, p)
+x_star, m_star, c_star = steady_state_circulation(s, A, L, p)
 max_quality_per_loop = c_star[-1]
 max_quality_per_second = max_quality_per_loop*loops_per_second
 max_quality_per_item_added = max_quality_per_second / items_added_per_sec
