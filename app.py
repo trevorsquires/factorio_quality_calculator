@@ -1,7 +1,9 @@
 import streamlit as st
+from streamlit_pdf_viewer import pdf_viewer
 import numpy as np
 import pandas as pd
 import base64
+
 
 # ----------------------------
 # Helpers / placeholders
@@ -295,4 +297,4 @@ with tab_theory:
             file_name="quality_analytics.pdf",
         )
 
-    display_pdf("out/quality_analytics.pdf")
+    pdf_viewer("out/quality_analytics.pdf")
